@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 
 
-img_counter = 0
+img_counter = 1
 
 # cam = cv2.VideoCapture(0)
 
@@ -49,9 +49,10 @@ img_counter = 0
 
 img_name = "opencv_frame_{}.png".format(img_counter)
 
+path = 'material/test_images/'
 
 "Read image"
-img = cv2.imread('material/opencv_images/'+img_name)
+img = cv2.imread(path + img_name)
 image_copy = img.copy()
 
 
@@ -59,16 +60,16 @@ image_copy = img.copy()
 gray_scale = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 #blurred = cv2.GaussianBlur(gray_scale,(5,5),cv2.BORDER_DEFAULT)
 
-(T, threshInv) = cv2.threshold(gray_scale,177,200,cv2.THRESH_BINARY_INV)
+(T, threshInv) = cv2.threshold(gray_scale,230,250,cv2.THRESH_BINARY_INV)
 
 blurred = cv2.GaussianBlur(threshInv,(5,5),cv2.BORDER_CONSTANT)
 "Create Contours"
-cont,_ = cv2.findContours(blurred, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+cont,_ = cv2.findContours(blurred, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 contours = sorted(cont, key=cv2.contourArea, reverse=True)
-contour_image = cv2.drawContours(image_copy, contours, -1,(0,250,0), 3);
+contour_image = cv2.drawContours(image_copy, contours, -1,(0,200,0), 3);
 
 "Use Minimal contour area"
-rect = cv2.minAreaRect(contours[0])
+rect = cv2.minAreaRect(contours[2])
 box = cv2.boxPoints(rect)
 
 "retview moments for center point location"
@@ -127,9 +128,21 @@ plt.subplot(2, 2, 4), plt.imshow(image_copy[:,:,::-1])
 plt.title("Contour Image")
 
 
+#Load the calibration parameters
+
+with np.load('CameraParameters.npz') as file:
+    mtx, dist, rvecs, tvecs = [file[i] for i in('cameraMatrix','dist','rvecs','tvecs')]
+    
+img = cv2.imread(path + img_name)
+h,  w = img.shape[:2]
+newCameraMatrix, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
 
 
+# Undistort
+dst = cv2.undistort(img, mtx, dist, None, newCameraMatrix)
 
+
+cv2.imwrite('calibrated_'+img_name, dst)
 
 
 

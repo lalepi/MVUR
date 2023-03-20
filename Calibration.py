@@ -10,7 +10,7 @@ import pickle
 
 ################ FIND CHESSBOARD CORNERS - OBJECT POINTS AND IMAGE POINTS #############################
 
-chessboardSize = (3,4)
+chessboardSize = (3,3)
 #frameSize = (1280,720)
 frameSize = (640,480)
 # termination criteria
@@ -68,6 +68,11 @@ ret, cameraMatrix, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints,
 pickle.dump((cameraMatrix, dist), open( "calibration.pkl", "wb" ))
 pickle.dump(cameraMatrix, open( "cameraMatrix.pkl", "wb" ))
 pickle.dump(dist, open( "dist.pkl", "wb" ))
+
+
+
+np.savez("CameraParameters", cameraMatrix=cameraMatrix, dist=dist, rvecs=rvecs, tvecs=tvecs)
+
 
 
 ############## UNDISTORTION #####################################################
